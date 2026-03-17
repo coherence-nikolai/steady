@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STEADY</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #0f0d0b;
+  --surface: #171410;
+  --border: rgba(210, 175, 130, 0.12);
+  --gold: #c8a97a;
+  --gold-dim: rgba(200, 169, 122, 0.5);
+  --gold-glow: rgba(200, 169, 122, 0.08);
+  --text: #e8e0d4;
+  --text-dim: rgba(232, 224, 212, 0.5);
+  --text-faint: rgba(232, 224, 212, 0.28);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-x: hidden;
+}
+
+/* Ambient light */
+body::before {
+  content: '';
+  position: fixed;
+  top: -20vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(ellipse, rgba(180, 140, 90, 0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+}
+
+/* SCREENS */
+.screen {
+  display: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.screen.active {
+  display: block;
+}
+
+.screen.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* HOME */
+.home-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 28px;
+}
+
+.home-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.home-sub {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--text-dim);
+  margin-bottom: 44px;
+  line-height: 1.6;
+}
+
+.state-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.state-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.2s, border-color 0.2s;
+  text-align: left;
+  width: 100%;
+}
+
+.state-btn:hover {
+  background: rgba(200, 169, 122, 0.06);
+  border-color: rgba(200, 169, 122, 0.25);
+}
+
+.state-btn:active {
+  transform: scale(0.99);
+}
+
+.state-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.state-hint {
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--text-faint);
+  margin-top: 2px;
+}
+
+.state-arrow {
+  color: var(--gold-dim);
+  font-size: 16px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+/* STATE SCREENS */
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 36px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s;
+}
+
+.back-btn:hover {
+  color: var(--gold-dim);
+}
+
+.state-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 42px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--gold);
+  margin-bottom: 6px;
+  line-height: 1;
+}
+
+.state-subtitle {
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 40px;
+}
+
+.divider {
+  width: 32px;
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 32px;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--text-dim);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s ease, transform 0.4s ease, color 0.2s;
+}
+
+.step.named {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.step.anchor {
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--gold-dim);
+}
+
+.step.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.step:last-child {
+  border-bottom: none;
+}
+
+/* Breath indicator */
+.breath-line {
+  width: 0%;
+  height: 1px;
+  background: var(--gold-dim);
+  margin-top: 32px;
+  transition: width 4s ease-in-out;
+}
+
+.breath-line.expand {
+  width: 100%;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HOME -->
+  <div id="home" class="screen active">
+    <p class="home-label">Steady</p>
+    <h1 class="home-title">Before the reaction</h1>
+    <p class="home-sub">Use this when things feel intense. Choose what's present.</p>
+
+    <div class="state-grid">
+      <button class="state-btn" onclick="openScreen('overwhelm')">
+        <div>
+          <div class="state-name">Overwhelm</div>
+          <div class="state-hint">Too much at once</div>
+        </div>
+        <span class="state-arrow">→</span>
+      </button>
+      <button class="state-btn" onclick="openScreen('procrastination')">
+        <div>
+          <div class="state-name">Procrastination</div>
+          <div class="state-hint">Can't begin</div>
+        </div>
+        <span class="state-arrow">→</span>
+      </button>
+      <button class="state-btn" onclick="openScreen('shame')">
+        <div>
+          <div class="state-name">Shame</div>
+          <div class="state-hint">Something feels wrong with you</div>
+        </div>
+        <span class="state-arrow">→</span>
+      </button>
+      <button class="state-btn" onclick="openScreen('anger')">
+        <div>
+          <div class="state-name">Anger</div>
+          <div class="state-hint">Activated and reactive</div>
+        </div>
+        <span class="state-arrow">→</span>
+      </button>
+      <button class="state-btn" onclick="openScreen('disconnection')">
+        <div>
+          <div class="state-name">Disconnection</div>
+          <div class="state-hint">Numb, gone, offline</div>
+        </div>
+        <span class="state-arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- OVERWHELM -->
+  <div id="overwhelm" class="screen">
+    <button class="back-btn" onclick="goHome()">← back</button>
+    <div class="state-title">Overwhelm</div>
+    <div class="state-subtitle">nervous system overload</div>
+    <div class="divider"></div>
+    <div class="steps">
+      <div class="step named">Your system is overloaded.</div>
+      <div class="step">Nothing is wrong with you.</div>
+      <div class="step">This is a nervous system response — not a character flaw.</div>
+      <div class="step anchor">Feel your breath at the upper lip. Stay here for a moment.</div>
+      <div class="step">When you're ready — one small step. Just one.</div>
+    </div>
+    <div class="breath-line" id="breath-overwhelm"></div>
+  </div>
+
+  <!-- PROCRASTINATION -->
+  <div id="procrastination" class="screen">
+    <button class="back-btn" onclick="goHome()">← back</button>
+    <div class="state-title">Procrastination</div>
+    <div class="state-subtitle">avoidance of discomfort</div>
+    <div class="divider"></div>
+    <div class="steps">
+      <div class="step named">You're not lazy.</div>
+      <div class="step">You're avoiding discomfort. That's what nervous systems do.</div>
+      <div class="step">The task isn't the threat — the feeling before starting is.</div>
+      <div class="step anchor">Feel your hands. Notice the weight of them. Stay here.</div>
+      <div class="step">Open the task. One sentence. One line. That's all.</div>
+    </div>
+    <div class="breath-line" id="breath-procrastination"></div>
+  </div>
+
+  <!-- SHAME -->
+  <div id="shame" class="screen">
+    <button class="back-btn" onclick="goHome()">← back</button>
+    <div class="state-title">Shame</div>
+    <div class="state-subtitle">a learned response</div>
+    <div class="divider"></div>
+    <div class="steps">
+      <div class="step named">You are not the problem.</div>
+      <div class="step">You are feeling shame. Those are different things.</div>
+      <div class="step">Shame is learned. It lives in the body, not in the truth.</div>
+      <div class="step anchor">Feel your feet on the ground. Let the floor hold you.</div>
+      <div class="step">One gentle step — toward something, not away.</div>
+    </div>
+    <div class="breath-line" id="breath-shame"></div>
+  </div>
+
+  <!-- ANGER -->
+  <div id="anger" class="screen">
+    <button class="back-btn" onclick="goHome()">← back</button>
+    <div class="state-title">Anger</div>
+    <div class="state-subtitle">a protection response</div>
+    <div class="divider"></div>
+    <div class="steps">
+      <div class="step named">You are activated.</div>
+      <div class="step">Your system is trying to protect you. That's its job.</div>
+      <div class="step">The threat feels real. Action can wait.</div>
+      <div class="step anchor">Feel your feet pressing into the ground. Weight down. Stay here.</div>
+      <div class="step">Do not act yet. Let the wave pass first.</div>
+    </div>
+    <div class="breath-line" id="breath-anger"></div>
+  </div>
+
+  <!-- DISCONNECTION -->
+  <div id="disconnection" class="screen">
+    <button class="back-btn" onclick="goHome()">← back</button>
+    <div class="state-title">Disconnection</div>
+    <div class="state-subtitle">a protective state</div>
+    <div class="divider"></div>
+    <div class="steps">
+      <div class="step named">You're not broken.</div>
+      <div class="step">Your system has gone offline. This is protection, not failure.</div>
+      <div class="step">Numbness is a door — not a wall.</div>
+      <div class="step anchor">Rub your hands together slowly. Feel the warmth. Stay here.</div>
+      <div class="step">One light action. Something small and physical.</div>
+    </div>
+    <div class="breath-line" id="breath-disconnection"></div>
+  </div>
+
+</div>
+
+<script>
+function openScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active', 'visible');
+  });
+
+  const target = document.getElementById(id);
+  target.classList.add('active');
+
+  // Trigger transition
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      target.classList.add('visible');
+    });
+  });
+
+  // Stagger steps
+  const steps = target.querySelectorAll('.step');
+  steps.forEach((step, i) => {
+    step.classList.remove('revealed');
+    setTimeout(() => {
+      step.classList.add('revealed');
+    }, 200 + i * 180);
+  });
+
+  // Breath line
+  const line = document.getElementById('breath-' + id);
+  if (line) {
+    line.classList.remove('expand');
+    setTimeout(() => line.classList.add('expand'), 600);
+  }
+}
+
+function goHome() {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active', 'visible');
+  });
+
+  const home = document.getElementById('home');
+  home.classList.add('active');
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      home.classList.add('visible');
+    });
+  });
+}
+
+// Initialise home visible
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    document.getElementById('home').classList.add('visible');
+  });
+});
+</script>
+
+</body>
+</html>
